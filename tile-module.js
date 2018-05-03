@@ -2,8 +2,10 @@ const fs = require('fs')
 const MBTiles = require('@mapbox/mbtiles')
 const express = require('express')
 const spdy = require('spdy')
+const cors = require('cors')
 
 const app = express()
+app.use(cors())
 let mbtiles = {}
 
 const scanFiles = () => {
@@ -25,7 +27,10 @@ scanFiles()
 
 app.get('/module/:z/:x/:y', (req, res, next) => {
   const [z, x, y] = [req.params.z, req.params.x, req.params.y].map(v => Number(v))
-  const t = `${z}-${x}-${y}`
+  const Z = 5
+  const X = x >> (z - Z)
+  const Y = y >> (z - Z)
+  const t = `${Z}-${X}-${Y}`
   getTile(t, z, x, y).then(tile => {
     if (tile) {
       res.set('Content-Encoding', 'gzip')
